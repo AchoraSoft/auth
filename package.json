@@ -1,0 +1,41 @@
+{
+    "name": "nextjs-supabase-auth-kit",
+    "version": "0.0.24",
+    "main": "dist/index.js",
+    "module": "dist/index.js",
+    "types": "dist/index.d.ts",
+    "files": [
+        "dist",
+        "src"
+    ],
+    "scripts": {
+        "build": "tsc"
+    },
+    "peerDependencies": {
+        "@supabase/supabase-js": "^2.0.0",
+        "next-auth": "^4.0.0",
+        "react": "^19.0.0",
+        "react-dom": "^19.0.0",
+        "react-hook-form": "^7.49.0",
+        "@emotion/react": "^11.0.0",
+        "@emotion/styled": "^11.0.0"
+    },
+    "dependencies": {
+        "@emotion/react": "^11.14.0",
+        "@emotion/styled": "^11.14.0",
+        "@hookform/resolvers": "^2.9.11",
+        "@next-auth/supabase-adapter": "^0.2.1",
+        "@supabase/supabase-js": "^2.0.0",
+        "jsonwebtoken": "^9.0.2",
+        "next-auth": "^4.0.0",
+        "react-hook-form": "^7.49.0",
+        "zod": "^3.22.4"
+    },
+    "devDependencies": {
+        "@types/jsonwebtoken": "^9.0.9",
+        "@types/node": "^20.10.3",
+        "@types/react": "^18.2.45",
+        "autoprefixer": "^10.4.20",
+        "typescript": "^5.3.3"
+    }
+}
