@@ -1,14 +1,13 @@
 import { supabase } from "../utils/supabaseClient";
-import { ForgotPasswordFormData } from "../schemas/auth";
 
-export function useForgotPassword() {
-  const forgotPassword = async ({ email }: ForgotPasswordFormData) => {
+export function useSignOut() {
+  const signOut = async () => {
     if (!supabase) {
       return { success: false, error: "Supabase client is not available." };
     }
 
     try {
-      const { error } = await supabase.auth.resetPasswordForEmail(email);
+      const { error } = await supabase.auth.signOut();
       if (error) throw error;
       return { success: true };
     } catch (error) {
@@ -16,5 +15,5 @@ export function useForgotPassword() {
     }
   };
 
-  return { forgotPassword };
+  return { signOut };
 }

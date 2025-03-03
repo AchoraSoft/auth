@@ -7,6 +7,7 @@ export function useForgotPasswordValidation() {
   const {
     register,
     handleSubmit,
+    clearErrors,
     formState: { errors },
   } = useForm<ForgotPasswordFormData>({
     resolver: zodResolver(forgotPasswordSchema), // Integrate Zod validation
@@ -16,5 +17,6 @@ export function useForgotPasswordValidation() {
     register,
     handleSubmit,
     errors,
+    clearErrors
   };
 }

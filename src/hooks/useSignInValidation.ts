@@ -7,6 +7,7 @@ export function useSignInValidation() {
   const {
     register,
     handleSubmit,
+    clearErrors,
     formState: { errors },
   } = useForm<SignInFormData>({
     resolver: zodResolver(signInSchema), // Integrate Zod validation
@@ -16,5 +17,6 @@ export function useSignInValidation() {
     register,
     handleSubmit,
     errors,
+    clearErrors
   };
 }

@@ -3,19 +3,20 @@
 
 import { useState } from "react";
 import { useSignInValidation, useSignUpValidation, useForgotPasswordValidation } from "../hooks";
-import { useSignIn, useSignUp, useForgotPassword } from "../hooks"; // Add the Supabase hooks
-import { signIn } from "next-auth/react";
+import { useSignIn, useSignUp, useForgotPassword } from "../hooks";
 import { css, Interpolation, Theme } from "@emotion/react";
 import styled from "@emotion/styled";
+import { useRouter } from "next/navigation";
 
 // Define a type for additional styles
 type AdditionalStyles = Interpolation<Theme>;
 
-// Styled components with additional styles prop
+// Styled components
 const Container = styled.div<{ styles?: AdditionalStyles }>`
   padding: 1.5rem;
   background-color: white;
   border-radius: 0.5rem;
+  min-width: 580px;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
   ${(props) => props.styles}
 `;
@@ -74,23 +75,66 @@ const Button = styled.button<{ styles?: AdditionalStyles }>`
 
 const ModeButton = styled.button<{ styles?: AdditionalStyles }>`
   color: #3b82f6;
+  cursor: pointer;
   &:hover {
     text-decoration: underline;
   }
   ${(props) => props.styles}
 `;
 
-// Props for the Auth component
+const SocialButton = styled.button<{ styles?: AdditionalStyles }>`
+  width: 100%;
+  padding: 0.5rem;
+  background-color: #ffffff;
+  color: #374151;
+  border: 1px solid #d1d5db;
+  border-radius: 0.375rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  &:hover {
+    background-color: #f3f4f6;
+  }
+  cursor: pointer
+  ${(props) => props.styles}
+`;
+
+// Props for custom labels
 interface AuthProps {
-  redirectUrl?: string; // Optional redirect URL
-  containerStyles?: AdditionalStyles; // Additional styles for Container
-  titleStyles?: AdditionalStyles; // Additional styles for Title
-  formStyles?: AdditionalStyles; // Additional styles for Form
-  labelStyles?: AdditionalStyles; // Additional styles for Label
-  inputStyles?: AdditionalStyles; // Additional styles for Input
-  errorMessageStyles?: AdditionalStyles; // Additional styles for ErrorMessage
-  buttonStyles?: AdditionalStyles; // Additional styles for Button
-  modeButtonStyles?: AdditionalStyles; // Additional styles for ModeButton
+  redirectUrl?: string;
+  containerStyles?: AdditionalStyles;
+  titleStyles?: AdditionalStyles;
+  formStyles?: AdditionalStyles;
+  labelStyles?: AdditionalStyles;
+  inputStyles?: AdditionalStyles;
+  errorMessageStyles?: AdditionalStyles;
+  buttonStyles?: AdditionalStyles;
+  modeButtonStyles?: AdditionalStyles;
+
+  // Customizable text labels
+  labels?: {
+    signInTitle?: string;
+    signUpTitle?: string;
+    forgotPasswordTitle?: string;
+    emailLabel?: string;
+    passwordLabel?: string;
+    confirmPasswordLabel?: string;
+    signInButton?: string;
+    signUpButton?: string;
+    forgotPasswordButton?: string;
+    createAccount?: string;
+    alreadyHaveAccount?: string;
+    forgotPasswordPrompt?: string;
+    backToSignIn?: string;
+    errorMessageGeneric?: string;
+  };
+  // Social providers configuration
+  socialProviders?: {
+      google?: boolean;
+      github?: boolean;
+    // Add more providers as needed
+  };
 }
 
 export function Auth({
@@ -103,66 +147,84 @@ export function Auth({
   errorMessageStyles,
   buttonStyles,
   modeButtonStyles,
+  labels = {}, // Default to an empty object if no labels are provided
+  socialProviders = {google: true}
 }: AuthProps) {
   const [mode, setMode] = useState<"signin" | "signup" | "forgot">("signin");
+  const [formError, setFormError] = useState<string | null>(null);
+  const router = useRouter();
 
-  // Use the appropriate validation hook based on the mode
+  // Validation hooks
   const signInValidation = useSignInValidation();
   const signUpValidation = useSignUpValidation();
   const forgotPasswordValidation = useForgotPasswordValidation();
 
-  // Use the Supabase hooks
-  const { signIn: signInWithSupabase } = useSignIn();
-  const { signUp: signUpWithSupabase } = useSignUp();
-  const { forgotPassword: forgotPasswordWithSupabase } = useForgotPassword();
+  // Supabase hooks
+  const { signIn, signInWithProvider } = useSignIn();
+  const { signUp } = useSignUp();
+  const { forgotPassword } = useForgotPassword();
 
-  const { register, handleSubmit, errors }: any =
-    mode === "signin"
-      ? signInValidation
-      : mode === "signup"
-      ? signUpValidation
-      : forgotPasswordValidation;
+  const { register, handleSubmit, errors, clearErrors }: any =
+    mode === "signin" ? signInValidation : mode === "signup" ? signUpValidation : forgotPasswordValidation;
 
+     // Handle social provider sign-in
+     const handleSocialSignIn = async (provider: "google" | "github") => {
+      const result = await signInWithProvider(provider);
+    
+      if (result.success) {
+        router.push(redirectUrl);
+      } else {
+        setFormError(result.error || "Failed to sign in with social provider.");
+      }
+    };
   const onSubmit = async (data: any) => {
-    if (mode === "signin") {
-      const result = await signInWithSupabase({ email: data.email, password: data.password });
-      if (result.success) {
-        alert("Signed in successfully!");
-        window.location.href = redirectUrl; // Use the configurable redirect URL
-      } else {
-        alert(result.error);
+    setFormError(null);
+
+    try {
+      if (mode === "signin") {
+        const result = await signIn({ email: data.email, password: data.password });
+        if (result.success) {
+          router.push(redirectUrl);
+        } else {
+          setFormError(result.error || labels.errorMessageGeneric || "Invalid login credentials.");
+        }
+      } else if (mode === "signup") {
+        const result = await signUp({ email: data.email, password: data.password });
+        if (result.success) {
+          router.push(redirectUrl);
+        } else {
+          setFormError(result.error || labels.errorMessageGeneric || "Signup failed. Please try again.");
+        }
+      } else if (mode === "forgot") {
+        const result = await forgotPassword({ email: data.email });
+        if (result.success) {
+          setMode("signin");
+        } else {
+          setFormError(result.error || labels.errorMessageGeneric || "Failed to reset password.");
+        }
       }
-    } else if (mode === "signup") {
-      const result = await signUpWithSupabase({ email: data.email, password: data.password });
-      if (result.success) {
-        alert("Signed up successfully!");
-      } else {
-        alert(result.error);
-      }
-    } else if (mode === "forgot") {
-      const result = await forgotPasswordWithSupabase({ email: data.email });
-      if (result.success) {
-        alert("Password reset email sent!");
-      } else {
-        alert(result.error);
-      }
+    } catch (error) {
+      setFormError(labels.errorMessageGeneric || "Something went wrong. Please try again.");
     }
   };
 
-  const changeMode = (newMode: "signin" | "signup" | "forgot") => {
-    setMode(newMode);
-  };
-
   return (
-    <Container styles={containerStyles}>
+    <Container styles={containerStyles} suppressHydrationWarning>
       <Title styles={titleStyles}>
-        {mode === "signin" ? "Sign In" : mode === "signup" ? "Sign Up" : "Forgot Password"}
+        {mode === "signin"
+          ? labels.signInTitle || "Sign In"
+          : mode === "signup"
+          ? labels.signUpTitle || "Sign Up"
+          : labels.forgotPasswordTitle || "Forgot Password"}
       </Title>
+
+      {formError && <ErrorMessage styles={errorMessageStyles}>{formError}</ErrorMessage>}
+
       <Form onSubmit={handleSubmit(onSubmit)} styles={formStyles}>
         <div>
-          <Label styles={labelStyles}>Email</Label>
+          <Label styles={labelStyles}>{labels.emailLabel || "Email"}</Label>
           <Input
-            {...register("email")}
+             {...register("email")}
             type="email"
             placeholder="Email"
             hasError={!!errors.email}
@@ -173,7 +235,7 @@ export function Auth({
 
         {mode !== "forgot" && (
           <div>
-            <Label styles={labelStyles}>Password</Label>
+            <Label styles={labelStyles}>{labels.passwordLabel || "Password"}</Label>
             <Input
               {...register("password")}
               type="password"
@@ -185,26 +247,67 @@ export function Auth({
           </div>
         )}
 
-        {mode === "signup" && (
-          <div>
-            <Label styles={labelStyles}>Confirm Password</Label>
-            <Input
-              {...register("confirmPassword")}
-              type="password"
-              placeholder="Confirm Password"
-              hasError={!!errors.confirmPassword}
-              styles={inputStyles}
-            />
-            {errors.confirmPassword && (
-              <ErrorMessage styles={errorMessageStyles}>{errors.confirmPassword.message}</ErrorMessage>
-            )}
-          </div>
-        )}
-
         <Button type="submit" styles={buttonStyles}>
-          {mode === "signin" ? "Sign In" : mode === "signup" ? "Sign Up" : "Reset Password"}
+          {mode === "signin"
+            ? labels.signInButton || "Sign In"
+            : mode === "signup"
+            ? labels.signUpButton || "Sign Up"
+            : labels.forgotPasswordButton || "Reset Password"}
         </Button>
       </Form>
+
+       {/* Social Providers */}
+       {(socialProviders.google) && (
+        <div
+          css={css`
+            margin-top: 1rem;
+            text-align: center;
+          `}
+        >
+          <p
+            css={css`
+              margin-bottom: 1rem;
+              color: #6b7280;
+            `}
+          >
+            Or continue with
+          </p>
+          <div
+            css={css`
+              display: flex;
+              flex-direction: column;
+              gap: 0.5rem;
+            `}
+          >
+            {socialProviders.google && (
+              <SocialButton onClick={() => handleSocialSignIn("google")}>
+                <img
+                  src="https://www.google.com/favicon.ico"
+                  alt="Google"
+                  css={css`
+                    width: 1rem;
+                    height: 1rem;
+                  `}
+                />
+                Google
+              </SocialButton>
+            )}
+            {socialProviders.github && (
+              <SocialButton onClick={() => handleSocialSignIn("github")}>
+                <img
+                  src="https://github.com/favicon.ico"
+                  alt="GitHub"
+                  css={css`
+                    width: 1rem;
+                    height: 1rem;
+                  `}
+                />
+                GitHub
+              </SocialButton>
+            )}
+          </div>
+        </div>
+      )}
 
       <div
         css={css`
@@ -212,27 +315,28 @@ export function Auth({
           text-align: center;
         `}
       >
-        {mode === "signin" && (
+        {
+        mode === "signin" ? (
           <>
-            <ModeButton onClick={() => changeMode("signup")} styles={modeButtonStyles}>
-              Create an account
+            <ModeButton onClick={() => setMode("signup")} styles={modeButtonStyles}>
+              {labels.createAccount || "Create an account"}
             </ModeButton>
             <br />
-            <ModeButton onClick={() => changeMode("forgot")} styles={modeButtonStyles}>
-              Forgot password?
+            <ModeButton onClick={() => setMode("forgot")} styles={modeButtonStyles}>
+              {labels.forgotPasswordPrompt || "Forgot password?"}
             </ModeButton>
           </>
-        )}
-        {mode === "signup" && (
-          <ModeButton onClick={() => changeMode("signin")} styles={modeButtonStyles}>
-            Already have an account? Sign In
+        ) : mode === "signup" ? (
+          <ModeButton onClick={() => setMode("signin")} styles={modeButtonStyles}>
+            {labels.alreadyHaveAccount || "Already have an account? Sign In"}
           </ModeButton>
-        )}
-        {mode === "forgot" && (
-          <ModeButton onClick={() => changeMode("signin")} styles={modeButtonStyles}>
-            Back to Sign In
+        ) : (
+          // Forgot password mode
+          <ModeButton onClick={() => setMode("signin")} styles={modeButtonStyles}>
+            {labels.backToSignIn || "Back to Sign In"}
           </ModeButton>
-        )}
+          )
+        }
       </div>
     </Container>
   );

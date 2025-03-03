@@ -1,13 +1,12 @@
-# Next.js Supabase Auth Kit
+# Next.js Supabase Auth Kit (This is a not the production ready version. It was made to have fun)
 
-A reusable authentication package for Next.js applications using **Supabase** and **Auth.js** (formerly NextAuth.js). This package provides components, hooks, and utilities for handling user authentication, including sign-in, sign-up, and password recovery.
+A reusable authentication package for Next.js applications using **Supabase**. This package provides components, hooks, and utilities for handling user authentication, including sign-in, sign-up, and password recovery.
 
 ---
 
 ## Features
 
 - **Supabase Integration**: Built on top of Supabase for user authentication and management.
-- **Auth.js Support**: Seamless integration with Auth.js for session management and social login.
 - **Zod Validation**: Form validation using Zod schemas for type safety and error handling.
 - **Reusable Hooks**: Custom hooks for sign-in, sign-up, and forgot password functionality.
 - **Protected Routes**: Higher-Order Component (HOC) to protect routes from unauthorized access.
@@ -115,6 +114,178 @@ export function SignInForm() {
 }
 ```
 
+Here's a **README section** that explains how to use the `AuthShadCDN` component:  
+
+---
+
+# **AuthShadCDN - Customizable Authentication Component**  
+
+`AuthShadCDN` is a fully configurable authentication component built with **ShadCN UI**, supporting **Supabase authentication**. You can easily customize its layout, styling, labels, and icons.
+
+---
+
+## **📦 Installation**  
+
+Ensure you have the required dependencies installed:  
+
+```sh
+npm install @supabase/supabase-js
+npm install lucide-react
+```
+
+---
+
+## **🚀 Usage Example**  
+
+### **1️⃣ Import Required Components**
+```tsx
+import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { AlertCircle, Github, Google } from "lucide-react";
+import { AuthShadCDN } from "@/components/AuthShadCDN";
+```
+
+### **2️⃣ Use `AuthShadCDN` in a Page**
+```tsx
+export default function AuthPage() {
+  return (
+    <AuthShadCDN
+      components={{
+        container: Card,
+        title: "h2",
+        form: "form",
+        label: Label,
+        input: Input,
+        button: {
+          item: Button,
+          title: "Submit",
+        },
+        modeButton: Button,
+        socialButton: Button,
+        errorMessage: "p",
+        link: "a",
+      }}
+      styles={{
+        container: "p-6 max-w-md mx-auto shadow-lg rounded-lg",
+        title: "text-2xl font-bold text-center mb-4",
+        form: "space-y-4",
+        label: "text-gray-700 text-sm font-medium",
+        input: "border rounded-md p-2 w-full",
+        button: "w-full bg-blue-500 text-white py-2 rounded-md hover:bg-blue-600",
+        modeButton: "mt-2 text-blue-500 hover:underline",
+        socialButton: "w-full flex items-center justify-center gap-2 py-2 border rounded-md hover:bg-gray-100",
+        errorMessage: "text-red-500 text-sm mt-1 flex items-center gap-1",
+        link: "text-blue-500 hover:underline cursor-pointer",
+      }}
+      icons={{
+        google: <Google size={18} />,
+        github: <Github size={18} />,
+      }}
+      labels={{
+        signInTitle: "Sign In to Your Account",
+        signUpTitle: "Create a New Account",
+        forgotPasswordTitle: "Reset Your Password",
+        emailLabel: "Your Email",
+        passwordLabel: "Your Password",
+        confirmPasswordLabel: "Confirm Password",
+        signInButton: "Sign In",
+        signUpButton: "Sign Up",
+        forgotPasswordButton: "Reset Password",
+        createAccount: "Don't have an account? Sign up",
+        alreadyHaveAccount: "Already have an account? Sign in",
+        forgotPasswordPrompt: "Forgot your password?",
+        backToSignIn: "Back to Sign In",
+      }}
+      socialProviders={{
+        google: true,
+        github: true,
+      }}
+    />
+  );
+}
+```
+
+---
+
+## **🛠 Configuration Options**  
+
+### **1️⃣ `components` (Custom UI Elements)**
+You can use any UI component for form elements:
+```tsx
+components={{
+  container: Card,          // Wrapper component
+  title: "h2",              // Title element
+  form: "form",             // Form tag
+  label: Label,             // Label component
+  input: Input,             // Input component
+  button: {                 // Submit button
+    item: Button,
+    title: "Submit",
+  },
+  modeButton: Button,       // Switch between sign-in & sign-up
+  socialButton: Button,     // Social login button
+  errorMessage: "p",        // Error message tag
+  link: "a",                // Link for navigation
+}}
+```
+
+### **2️⃣ `styles` (Tailwind or CSS Classes)**
+Define CSS styles as a string:
+```tsx
+styles={{
+  container: "p-6 max-w-md mx-auto shadow-lg rounded-lg",
+  title: "text-2xl font-bold text-center mb-4",
+  button: "w-full bg-blue-500 text-white py-2 rounded-md hover:bg-blue-600",
+  errorMessage: "text-red-500 text-sm mt-1 flex items-center gap-1",
+  link: "text-blue-500 hover:underline cursor-pointer",
+}}
+```
+
+### **3️⃣ `labels` (Custom Text)**
+Override default button & form text:
+```tsx
+labels={{
+  signInTitle: "Sign In to Your Account",
+  signUpTitle: "Create a New Account",
+  emailLabel: "Your Email",
+  passwordLabel: "Your Password",
+}}
+```
+
+### **4️⃣ `icons` (Social Login Icons)**
+Use any React icon components:
+```tsx
+icons={{
+  google: <Google size={18} />,
+  github: <Github size={18} />,
+}}
+```
+
+### **5️⃣ `socialProviders` (Enable Social Logins)**
+Choose which social logins to enable:
+```tsx
+socialProviders={{
+  google: true,
+  github: true,
+}}
+```
+
+---
+
+## **🌟 Features**
+✅ **Fully customizable UI** (ShadCN, Tailwind, or any component library)  
+✅ **Supabase authentication** (Email/password & social login)  
+✅ **Error handling** (Inline messages for input fields)  
+✅ **Accessibility** (ARIA support, keyboard-friendly)  
+✅ **Custom styling & icons**  
+
+
+---
+
+Now, your `AuthShadCDN` component is **documented and easy to use!** 🚀
+
 ### 3. Protect Routes
 
 Use the `WithAuth` HOC to protect routes from unauthorized access.
@@ -158,7 +329,7 @@ export default WithAuth(Dashboard);
 - **`signUpSchema`**: Zod schema for sign-up form validation.
 - **`forgotPasswordSchema`**: Zod schema for forgot password form validation.
 
----
+
 
 ## Contributing
 

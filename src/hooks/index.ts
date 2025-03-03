@@ -4,3 +4,4 @@ export { useForgotPassword } from "./useForgotPassword";
 export { useForgotPasswordValidation } from "./useForgotPasswordValidation";
 export { useSignInValidation } from "./useSignInValidation";
 export { useSignUpValidation } from "./useSignUpValidation";
+export { useSignOut } from "./useSignOut";

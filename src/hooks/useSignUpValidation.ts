@@ -7,6 +7,7 @@ export function useSignUpValidation() {
   const {
     register,
     handleSubmit,
+    clearErrors,
     formState: { errors },
   } = useForm<SignUpFormData>({
     resolver: zodResolver(signUpSchema), // Integrate Zod validation
@@ -16,5 +17,6 @@ export function useSignUpValidation() {
     register,
     handleSubmit,
     errors,
+    clearErrors
   };
 }
